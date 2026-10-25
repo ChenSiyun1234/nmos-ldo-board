@@ -1,0 +1,9 @@
+parameter,datasheet,model
+open loop gain at 1 Hz (dB),120 typ,120.0
+"gain bandwidth, |A| x f at 1 MHz (MHz)",50 typ,49.8
+unity gain crossing (MHz),not specified,44.6
+phase at unity gain (deg),not specified,-116.9
+"slew rate, 20 to 80 % (V/us)",25 typ,24.9
+"max output, 100 kohm load (V)",within about 10 mV of 5 V,4.9840
+"min output, 100 kohm load (V)",within about 10 mV of 0 V,0.0140
+supply current (mA),4.6 typ,4.60

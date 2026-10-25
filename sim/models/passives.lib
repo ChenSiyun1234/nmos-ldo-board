@@ -1,0 +1,24 @@
+* Capacitor and small-signal device models written for this project.
+*
+* CAP_RLC: series C, ESR, ESL. Values are passed per instance. The ESL has a
+* 2 ohm damping resistor across it, which keeps the solver from ringing. Below
+* 25 MHz it changes the impedance of a 2.5 nH ESL by less than 2 %.
+*  - KEMET T520D337M006ATE015 polymer tantalum: 330 uF, ESR 15 mohm max at
+*    100 kHz (datasheet). ESL 2.5 nH is an assumption for a 7343 body.
+*  - Murata GRM31CR60J476ME19L 47 uF X5R 1206: modelled as 40 uF to allow for
+*    DC bias and tolerance at 1 V, 3 mohm ESR, 0.8 nH ESL (assumptions).
+*  - 0.1 uF X7R 0603: 20 mohm ESR, 0.5 nH ESL (assumptions).
+.subckt CAP_RLC a b params: c=1u esr=10m esl=1n
+C1 a n1 {c}
+R1 n1 n2 {esr}
+L1 n2 b {esl}
+RL1 n2 b 2
+.ends CAP_RLC
+
+* BSS138 small-signal NMOS for the enable logic. A generic VDMOS set to the
+* typical 1.3 V threshold of the BSS138 (datasheet range 0.8 V to 1.5 V) and a
+* few ohms of on resistance. Only the switching function matters here.
+.model BSS138 VDMOS(vto=1.3 kp=0.5 ksubthres=0.08 rd=0.5 rs=0.2 cgs=20p cgdmin=4p cgdmax=10p a=0.5 cjo=15p is=1e-12 bv=50)
+
+* 1N4148W small-signal diode, the commonly published 1N4148 SPICE parameters.
+.model D1N4148 D(is=2.52n rs=0.568 n=1.752 cjo=4p m=0.4 tt=20n bv=75 ibv=5u)

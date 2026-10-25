@@ -1,0 +1,6 @@
+path,resistance_mohm
+VIN: J1 pin 2 to the Q1 tab,0.383
+VOUT: Q1 source to C3,0.989
+VOUT: Q1 source to J2 pin 1,2.538
+GND: J2 pin 2 to J1 pin 1,0.460
+VOUT: C3 to J2 pin 1 (difference),1.548

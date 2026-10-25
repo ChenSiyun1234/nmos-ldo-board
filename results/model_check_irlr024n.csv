@@ -1,0 +1,17 @@
+parameter,datasheet,model,note
+VGS(th) at 250 uA (V),1.0 to 2.0 (model set to 1.5),1.500,Id at VGS=VDS=1.5 V is 248.0 uA
+"RDS(on) at VGS=10 V, ID=10 A (ohm)",0.065 max,0.0634,
+"RDS(on) at VGS=5 V, ID=10 A (ohm)",0.080 max,0.0848,
+"RDS(on) at VGS=4 V, ID=9 A (ohm)",0.110 max,0.1059,
+Ciss at VDS=25 V (pF),480 typ,480.0,
+Coss at VDS=25 V (pF),130 typ,130.0,
+Crss at VDS=25 V (pF),61 typ,61.0,
+Qgs (nC),3.7 max,1.61,"datasheet at VDS=44 V and ID=11 A, bench at 10 A"
+Qgd (nC),8.5 max,8.50,"fitted, bench at 10 A"
+Qg at VGS=5 V (nC),15 max,13.72,"check, bench at 10 A"
+gfs at VDS=25 V (S),8.3 min,8.42,"check at ID=10 A and VGS=3.50 V, datasheet tests at 11 A"
+VGS for ID=1 mA at VDS=0.8 V (V),model output,1.573,gm=0.01886 S
+VGS for ID=2 mA at VDS=0.8 V (V),model output,1.610,gm=0.03683 S
+VGS for ID=10 mA at VDS=0.8 V (V),model output,1.701,gm=0.1667 S
+VGS for ID=100 mA at VDS=0.8 V (V),model output,1.867,gm=1.086 S
+VGS for ID=1000 mA at VDS=0.8 V (V),model output,2.209,gm=4.031 S

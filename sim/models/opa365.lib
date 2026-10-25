@@ -1,0 +1,43 @@
+* OPA365 macromodel written for this project (not the vendor model).
+*
+* Datasheet numbers it uses (TI OPA365, 5 V supply, typical):
+*   gain bandwidth product 50 MHz
+*   slew rate 25 V/us
+*   open loop gain 120 dB
+*   quiescent current 4.6 mA
+*   output swing to within about 10 mV of either rail at light load
+*   short circuit current 65 mA, used as the output current limit
+* Assumed (not table values):
+*   open loop output resistance 40 ohm,
+*   second pole at 90 MHz (gives about 60 degrees of unity gain margin).
+* Not modelled: noise, CMRR, PSRR, input capacitance, input bias current,
+* the input crossover region (the real part has none), temperature drift.
+*
+* Pins: non-inverting input, inverting input, positive supply, negative supply, output
+.subckt OPA365 inp inn vcc vee out params: vos=0 ro=40 isc=65m
+.param gbw=50e6 sr=25e6 aol=1e6 c1v=10p
+.param imax={sr*c1v} gm1={2*3.14159265359*gbw*c1v} r1v={aol/gm1}
+.param vsw=0.010 cp2={1/(2*3.14159265359*90e6*1e3)}
+* supply current
+Iq vcc vee DC 4.6m
+* mid supply reference for the gain node
+Bmid mid 0 V = 0.5*(V(vcc)+V(vee))
+* offset voltage source on the non-inverting input
+Vos inp inp_i DC {vos}
+* stage 1: slew limited transconductance into an RC (dominant pole 50 Hz)
+B1 mid n1 I = {imax}*tanh((V(inp_i)-V(inn))*{gm1}/{imax})
+R1 n1 mid {r1v}
+C1 n1 mid {c1v}
+* soft clamp of the gain node 10 mV inside the rails (prevents wind-up).
+* Clamp conductance 1 S with a 2 mV knee; the guard avoids exp() overflow.
+Bclp n1 0 I = ((V(n1)-V(vcc)+{vsw}) > 0.06 ? (V(n1)-V(vcc)+{vsw}) : 0.002*ln(1+exp((V(n1)-V(vcc)+{vsw})/0.002))) - ((V(vee)+{vsw}-V(n1)) > 0.06 ? (V(vee)+{vsw}-V(n1)) : 0.002*ln(1+exp((V(vee)+{vsw}-V(n1))/0.002)))
+* stage 2: non-dominant pole at 90 MHz
+B2 n2a 0 V = V(n1)
+R2 n2a n2 1k
+C2 n2 0 {cp2}
+* output stage: Thevenin source with resistance ro and current limit isc
+Bo 0 out I = {isc}*tanh((V(n2)-V(out))/({ro}*{isc}))
+* the output current is drawn from the positive supply when sourcing; the
+* split is a smooth max(I, 0) with a 1 uA knee so the solver sees no kink
+Bsup vcc 0 I = 0.5*({isc}*tanh((V(n2)-V(out))/({ro}*{isc})) + sqrt({isc}*tanh((V(n2)-V(out))/({ro}*{isc}))*{isc}*tanh((V(n2)-V(out))/({ro}*{isc})) + 1e-12))
+.ends OPA365

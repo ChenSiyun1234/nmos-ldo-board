@@ -1,0 +1,113 @@
+* NMOS LDO board, 1.5 V to 2.0 V in, 1.0 V out, 0 to 1 A.
+* Reference designators match hardware/nmos-ldo-board.kicad_sch.
+*
+* Ports
+*   vin_t   J1 pin 2 (VIN)      gin_t   J1 pin 1 (input return)
+*   vout_t  J2 pin 1 (VOUT)     gout_t  J2 pin 2 (load return, sense ground GND_S)
+*   p5v_t   J3 pin 3 (+5 V)     en_t    J3 pin 2 (EN)     gb_t  J3 pin 1 (bias return)
+*
+* Copper: the DC resistance of each high current path comes from the routed
+* board (sim/pcb_parasitics.py, results/data/pcb_resistance.csv) and is rounded
+* up here. The inductances are estimates for the path length over the ground
+* plane. Each one has a 2 ohm damping resistor across it, which keeps the
+* solver from ringing on nodes that only see inductors. Below 25 MHz it
+* changes their impedance by less than 2 %. Node "gnd" is the inner ground
+* planes.
+*
+* Q1's package inductance is left out: it resonates with the gate capacitance
+* near 90 MHz, far above the loop, and it slows the transient runs a lot.
+*
+* Threshold corners: the runner swaps the IRLR024N model name on MQ1 for
+* IRLR024N_VTLO or IRLR024N_VTHI.
+*
+* Loop gain hooks: VLB sits in series with the Kelvin sense line between the
+* net tie NT1 and the top of the divider. ILB injects current at the divider
+* side. VLB2 and ILB2 do the same at the op-amp output pin, which every loop
+* passes through (outer regulation loop and the op-amp's local loop through
+* the compensation network). All are zero unless a loop gain run sets them.
+.subckt LDO_BOARD vin_t gin_t vout_t gout_t p5v_t en_t gb_t
++ params: c_poly=330u esr_poly=15m esl_poly=2.5n
++         c_cer=40u esr_cer=3m esl_cer=0.8n
++         rtop=2.55k rbot=10.2k ra=5.62k rb=10k css=0.47u
++         rc=127k cc=1n cp=3.3p riso=47 rgpd=100k rpre=200
++         rpcb_in=0.5m lpcb_in=2n rpcb_q=1m lpcb_q=1n rpcb_out=1.6m lpcb_out=1n
++         rpcb_gnd=0.25m lpcb_gnd=0.5n
++         ruv_top=23.2k ruv_bot=10k ro_ea=40
++         vos=0 referr=0 lb_vac=0 lb_iac=0 lb2_vac=0 lb2_iac=0
+
+* ---- input: J1, copper to the input capacitors and the Q1 tab
+Rpin vin_t vin_a {rpcb_in}
+Lpin vin_a vin {lpcb_in}
+Rpind vin_a vin 2
+Rgin gin_t gnd_a {rpcb_gnd}
+Lgin gnd_a gnd {lpcb_gnd}
+Rgind gnd_a gnd 2
+XC1 vin gnd CAP_RLC c={c_poly} esr={esr_poly} esl={esl_poly}
+XC2 vin gnd CAP_RLC c={c_cer} esr={esr_cer} esl={esl_cer}
+
+* ---- pass device: drain on the tab (VIN), source lead to VOUT copper
+MQ1 vin gate vout_q IRLR024N
+Rpq vout_q vout_b {rpcb_q}
+Lpq vout_b vout {lpcb_q}
+Rpqd vout_b vout 2
+
+* ---- output capacitors, preload, discharge path
+XC3 vout gnd CAP_RLC c={c_poly} esr={esr_poly} esl={esl_poly}
+XC4 vout gnd CAP_RLC c={c_cer} esr={esr_cer} esl={esl_cer}
+XC5 vout gnd CAP_RLC c={c_cer} esr={esr_cer} esl={esl_cer}
+XC6 vout gnd CAP_RLC c={c_cer} esr={esr_cer} esl={esl_cer}
+R1 vout gnd {rpre}
+R12 vout dchg 22
+MQ4 dchg en_n gnd BSS138
+
+* ---- copper from the output capacitors to J2, then the load terminals
+Rpout vout vout_c {rpcb_out}
+Lpout vout_c vout_t {lpcb_out}
+Rpoutd vout_c vout_t 2
+Rgout gout_t gnd_b {rpcb_gnd}
+Lgout gnd_b gnd {lpcb_gnd}
+Rgoutd gnd_b gnd 2
+XC7 vout_t gout_t CAP_RLC c=0.1u esr=20m esl=0.5n
+
+* ---- Kelvin sense: NT1 ties VOUT_S to J2 pin 1, NT2 ties GND_S to J2 pin 2
+VLB fb_top vout_t DC 0 AC {lb_vac}
+ILB 0 fb_top DC 0 AC {lb_iac}
+R2 fb_top fb {rtop}
+R3 fb gout_t {rbot}
+
+* ---- error amplifier with PI compensation and a high frequency pole
+XU1 vset fb p5v gnd eaout_u OPA365 vos={vos} ro={ro_ea}
+VLB2 eaout eaout_u DC 0 AC {lb2_vac}
+ILB2 0 eaout DC 0 AC {lb2_iac}
+R4 eaout comp {rc}
+C9 comp fb {cc}
+C10 eaout fb {cp}
+R5 eaout gate {riso}
+R6 gate gnd {rgpd}
+XC8 p5v gnd CAP_RLC c=0.1u esr=20m esl=0.5n
+
+* ---- reference, divider to 0.8 V, soft start capacitor (all on GND_S)
+XU2 p5v vref gout_t REF3012 err={referr}
+XC11 p5v gout_t CAP_RLC c=0.1u esr=20m esl=0.5n
+R7 vref vset {ra}
+R8 vset gout_t {rb}
+C12 vset gout_t {css}
+
+* ---- bias input J3, enable logic and VIN undervoltage lockout
+Rgb gb_t gnd 1m
+Rp5 p5v_t p5v 1m
+XC13 p5v gnd CAP_RLC c=10u esr=5m esl=0.5n
+R10 en_t en_int 4.7k
+R9 en_int p5v 100k
+XU3 en_int gnd p5v ct_nc uv_sense p5v TPS3808G01
+Rct ct_nc gnd 1G
+R14 vin uv_sense {ruv_top}
+R15 uv_sense gnd {ruv_bot}
+XC14 p5v gnd CAP_RLC c=0.1u esr=20m esl=0.5n
+MQ2 en_n en_int gnd BSS138
+R11 p5v en_n 10k
+MQ3 vset en_n gout_t BSS138
+D1 en_n inj D1N4148
+R13 inj fb 100k
+
+.ends LDO_BOARD

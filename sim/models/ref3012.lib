@@ -1,0 +1,13 @@
+* REF3012 behavioural model written for this project (not the vendor model).
+* Datasheet numbers it uses (TI REF3012): 1.25 V output, 1.8 V minimum supply,
+* 42 uA typical supply current. The output starts regulating as IN rises
+* through about 1.3 V to 1.6 V and is flat above that.
+* Assumed: 0.5 ohm output resistance. Not modelled: noise, line and load
+* regulation, temperature drift, turn-on settling time.
+* The +/-0.2 % initial accuracy is handled as a corner parameter (err).
+* Pins: IN OUT GND
+.subckt REF3012 in out gnd params: err=0
+Iq in gnd DC 42u
+Bref oi gnd V = 1.25*(1+{err})/(1+exp(-(V(in,gnd)-1.45)/0.03))
+Rout oi out 0.5
+.ends REF3012

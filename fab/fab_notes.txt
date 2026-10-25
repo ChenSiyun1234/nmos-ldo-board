@@ -1,0 +1,21 @@
+NMOS LDO board, rev A: fabrication notes
+
+Board
+  54 x 42 mm, 4 layers, 1.6 mm FR4
+  35 um copper on all four layers
+  Stackup: F.Cu, 0.2104 mm prepreg, In1.Cu, 1.02 mm core, In2.Cu, 0.2104 mm prepreg, B.Cu
+  ENIG finish, solder mask and silkscreen on both sides
+  Smallest track 0.25 mm, smallest clearance 0.2 mm, smallest drill 0.3 mm
+
+Vias
+  Fill and cap the 25 vias inside the Q1 tab pad, IPC-4761 type VII.
+  They are the 5 x 5 array of 0.3 mm vias under Q1. Filled vias keep solder
+  from wicking down them during reflow and leaving voids under the tab.
+  Every other via is tented.
+
+Files
+  gerbers/                      Gerber X2 per layer, Excellon PTH and NPTH drill files, drill maps
+  nmos-ldo-board-gerbers.zip    the same set, zipped
+  bom.csv                       grouped BOM with manufacturer part numbers
+  pick_and_place.csv            SMD placement in mm, same origin as the Gerbers
+  nmos-ldo-board.step           3D model of the board with parts

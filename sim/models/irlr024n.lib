@@ -1,0 +1,8 @@
+* IRLR024N logic level NMOS, ngspice VDMOS model fitted by sim/fit_mosfet.py
+* Fitted to datasheet table values: VGS(th) 250 uA point (set to the 1.5 V middle of
+* the 1.0 V to 2.0 V range), RDS(on) max at 10 V / 5 V / 4 V, Ciss, Coss, Crss at 25 V,
+* and Qgd max. Not fitted: temperature behaviour, avalanche, quasi saturation.
+* Assumed (not on the datasheet): rs=0.005, lambda=0.003, ksubthres=0.1, vj=0.8, m=0.5, cgdmin=1.5e-11, is=1e-10, n=1.1, rb=0.03, bv=60, ibv=0.00025
+.model IRLR024N VDMOS(vto=1.78032316 kp=14.2559174 theta=0.681234437 lambda=0.003 rd=2.11389624e-06 rs=0.005 ksubthres=0.1 mtriode=1 cgs=4.19e-10 cgdmin=1.5e-11 cgdmax=1.6764975e-09 a=0.561047916 cjo=3.91844676e-10 vj=0.8 m=0.5 is=1e-10 n=1.1 rb=0.03 bv=60 ibv=0.00025)
+.model IRLR024N_VTLO VDMOS(vto=1.28032316 kp=14.2559174 theta=0.681234437 lambda=0.003 rd=2.11389624e-06 rs=0.005 ksubthres=0.1 mtriode=1 cgs=4.19e-10 cgdmin=1.5e-11 cgdmax=1.6764975e-09 a=0.561047916 cjo=3.91844676e-10 vj=0.8 m=0.5 is=1e-10 n=1.1 rb=0.03 bv=60 ibv=0.00025)
+.model IRLR024N_VTHI VDMOS(vto=2.28032316 kp=14.2559174 theta=0.681234437 lambda=0.003 rd=2.11389624e-06 rs=0.005 ksubthres=0.1 mtriode=1 cgs=4.19e-10 cgdmin=1.5e-11 cgdmax=1.6764975e-09 a=0.561047916 cjo=3.91844676e-10 vj=0.8 m=0.5 is=1e-10 n=1.1 rb=0.03 bv=60 ibv=0.00025)

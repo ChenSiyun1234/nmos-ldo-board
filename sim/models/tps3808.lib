@@ -1,0 +1,23 @@
+* TPS3808G01 behavioural model written for this project (not the vendor model).
+* Datasheet numbers it uses (TI TPS3808, adjustable G01 version): SENSE
+* threshold 0.405 V, open-drain active-low RESET, fixed 20 ms reset delay when
+* the CT pin is left open, 1.7 V to 6.5 V supply.
+* Assumed: 100 ohm RESET pull-down when asserted.
+* Not modelled: threshold hysteresis, supply current, behaviour below the
+* minimum VDD, MR timing.
+* Pins: RESET GND MR CT SENSE VDD
+.subckt TPS3808G01 reset gnd mr ct sense vdd params: tdly=20m
+* comparator: 3 mV wide smooth edge at 0.405 V. The part's small hysteresis
+* is left out so the DC operating point converges cleanly.
+Bcmp cmp gnd V = 1/(1+exp(-(V(sense,gnd)-0.405)/0.003))
+* reset delay: charges toward 1 while SENSE is good, resets fast when not.
+* rch is precomputed because ngspice pastes a braced expression into a
+* B-source without parentheses.
+.param rch={tdly/0.6931/1e-6}
+Bdly gnd dl I = V(cmp,gnd)*(1-V(dl,gnd))/{rch} - (1-V(cmp,gnd))*V(dl,gnd)/100
+Cdly dl gnd 1u
+Rdly dl gnd 1G
+* open-drain output: on (100 ohm) while the delay node is below 0.5, with a
+* 1 mV wide edge so RESET lets go 20 ms after SENSE comes good
+Bout reset gnd I = V(reset,gnd)/100*(1-1/(1+exp(-(V(dl,gnd)-0.5)/0.001)))
+.ends TPS3808G01

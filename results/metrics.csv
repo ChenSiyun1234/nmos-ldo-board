@@ -1,0 +1,59 @@
+group,metric,condition,target,simulated,unit,result
+DC,Output voltage,"VIN 1.8 V, 0.5 A",1.000 V +/-1 %,1.0003,V,meets
+DC,5 V bias current,"VIN 1.8 V, 0.5 A",report,5.17,mA,info
+DC,VIN current at no load,"VIN 1.8 V, 0 A (includes 5 mA preload)",report,5.13,mA,info
+DC,"Initial accuracy, worst case low","ref 0.2 %, R 0.1 %, offset 200 uV",>= 0.990 V,0.9969,V,meets
+DC,"Initial accuracy, worst case high","ref 0.2 %, R 0.1 %, offset 200 uV",<= 1.010 V,1.0037,V,meets
+DC,Load regulation at J2 (sense point),"0 to 1 A, VIN 1.8 V",<= 1 mV,0.001,mV,meets
+DC,Q1 source voltage rise,0 to 1 A (copper drop the sense removes),report,2.60,mV,info
+DC,Line regulation,"VIN 1.5 to 2.0 V, 0 A",<= 1 mV,< 0.001,mV,meets
+DC,Line regulation,"VIN 1.5 to 2.0 V, 1 A",<= 1 mV,< 0.001,mV,meets
+DC,Dropout voltage,"1 A, VOUT 1 % low",<= 200 mV,90,mV,meets
+DC,Dropout voltage,"0.5 A, VOUT 1 % low",report,45,mV,info
+Thermal,"Q1 dissipation, worst case","VIN 2.0 V, 1 A",report,1.001,W,info
+Stability,Crossover frequency,"0 A (5 mA preload only), VIN 1.8 V",report,1.8,kHz,info
+Stability,Phase margin,"0 A (5 mA preload only), VIN 1.8 V",>= 45 deg,59,deg,meets
+Stability,Gain margin,"0 A (5 mA preload only), VIN 1.8 V",>= 10 dB,63.4,dB,meets
+Stability,Crossover frequency,"0.01 A, VIN 1.8 V",report,4.2,kHz,info
+Stability,Phase margin,"0.01 A, VIN 1.8 V",>= 45 deg,79,deg,meets
+Stability,Gain margin,"0.01 A, VIN 1.8 V",>= 10 dB,54.6,dB,meets
+Stability,Crossover frequency,"0.1 A, VIN 1.8 V",report,23.4,kHz,info
+Stability,Phase margin,"0.1 A, VIN 1.8 V",>= 45 deg,108,deg,meets
+Stability,Gain margin,"0.1 A, VIN 1.8 V",>= 10 dB,40.6,dB,meets
+Stability,Crossover frequency,"1 A, VIN 1.8 V",report,180.0,kHz,info
+Stability,Phase margin,"1 A, VIN 1.8 V",>= 45 deg,81,deg,meets
+Stability,Gain margin,"1 A, VIN 1.8 V",>= 10 dB,30.6,dB,meets
+Stability,"Phase margin, op-amp output break",0 to 1 A (local compensation loop),>= 45 deg,141,deg,meets
+Stability,Worst phase margin over ESR range,"polymer 5-45 mohm, ceramic 1-10 mohm, 0 and 1 A",>= 45 deg,57,deg,meets
+Stability,Worst gain margin over ESR range,"polymer 5-45 mohm, ceramic 1-10 mohm, 0 and 1 A",>= 10 dB,30.4,dB,meets
+Stability,Worst phase margin over corners,"Vth, VIN, C tolerance, op-amp Ro, Cc/Cp",>= 45 deg,56,deg,meets
+Stability,Worst gain margin over corners,"Vth, VIN, C tolerance, op-amp Ro, Cc/Cp",>= 10 dB,29.6,dB,meets
+PSRR,PSRR from VIN,"1 kHz, 1 A, VIN 1.8 V",>= 60 dB,99,dB,meets
+PSRR,PSRR from VIN,"10 kHz, 1 A, VIN 1.8 V",>= 40 dB,81,dB,meets
+PSRR,PSRR from VIN,"100 kHz, 1 A, VIN 1.8 V",>= 30 dB,63,dB,meets
+PSRR,PSRR from VIN,"1 MHz, 1 A, VIN 1.8 V",report,70,dB,info
+PSRR,PSRR from VIN,"100 kHz, 1 A, VIN 1.5 V",report,62,dB,info
+PSRR,Lowest PSRR from 10 Hz to 1 MHz,"1 A, VIN 1.8 V, at 355 kHz",report,50,dB,info
+Transient,Peak closed loop output impedance,"10 Hz to 1 MHz, 10 mA and 1 A",report,83.7,mohm,info
+Transient,Load step undershoot,"10 mA to 1 A in 1 us, VIN 1.8 V",>= -30 mV (3 %),-8.7,mV,meets
+Transient,Load release overshoot,"1 A to 10 mA in 1 us, VIN 1.8 V",<= +30 mV (3 %),7.4,mV,meets
+Transient,Recovery to within 1 mV,after the 10 mA to 1 A step,report,292,us,info
+Transient,Recovery to within 1 mV,after the 1 A to 10 mA step,report,278,us,info
+Transient,Load step undershoot,"10 mA to 1 A in 1 us, VIN 1.5 V",>= -30 mV (3 %),-8.7,mV,meets
+Transient,Line step deviation,"VIN 1.5 to 2.0 V and back in 10 us, 1 A",<= 10 mV (1 %),0.08,mV,meets
+Transient,Line step deviation,"VIN 1.5 to 2.0 V and back in 10 us, 0.01 A",<= 10 mV (1 %),0.02,mV,meets
+Startup,Soft start rise time 10 to 90 %,"EN high, no load",1 to 10 ms,3.69,ms,meets
+Startup,Time from EN to 99 %,no load,report,7.8,ms,info
+Startup,Peak VOUT during soft start,no load,<= 1.010 V (1 % overshoot),1.0002,V,meets
+Startup,Peak input current at startup,no load (output capacitor charging),<= 0.5 A,0.35,A,meets
+Startup,Peak input current at startup,1 ohm load,report,1.01,A,info
+Startup,Peak VOUT during soft start,1 ohm load,<= 1.010 V (1 % overshoot),1.0002,V,meets
+Startup,Output discharge after EN low,"no load, to 10 %",report,21.7,ms,info
+Startup,UVLO release delay after VIN good,VIN ramps after 5 V and EN,report,20.4,ms,info
+Startup,Peak VOUT when VIN comes up last,"VIN 0 to 1.8 V in 1 ms, EN already high",<= 1.010 V (1 % overshoot),1.0003,V,meets
+Thermal,Q1 junction temperature,"1.00 W, 25 C still air",<= 125 C,58,C,meets
+Thermal,Q1 junction temperature,"1.00 W, 25 C, 35 % less surface cooling",<= 125 C,68,C,meets
+Thermal,"Junction to ambient, Q1 on this board",still air / 35 % less cooling,report,32 / 43,K/W,info
+Thermal,Hottest polymer capacitor,"C1, 25 C still air",<= 105 C rating,49,C,meets
+Thermal,Highest ambient for TJ 125 C,35 % less surface cooling,report,82,C,info
+Thermal,"Q1 junction temperature, tab vias left out","same board without the 30 vias at the Q1 tab, 25 C still air",report,64,C,info
