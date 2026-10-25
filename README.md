@@ -1,50 +1,65 @@
-# NMOS LDO Board
+# NMOS LDO
 
-A linear regulator board that makes 1.0 V at up to 1 A from a 1.5 to 2.0 V rail. I designed the circuit, laid out a four-layer board in KiCad 10, and checked it with ngspice and a thermal model of the routed copper. The results below are from simulation.
+A 1.0 V, 1 A low-dropout regulator built from a power NMOS and an op amp. Four-layer board in KiCad 10, simulated in ngspice.
 
-![Board render](docs/img/board_angle.png)
+![NMOS LDO board](docs/img/hero.png)
+
+The target was 1.0 V at 1 A from a 1.5 to 2.0 V input with less than 200 mV of dropout. It ended up at 90 mV at 1 A. Everything here is simulated: ngspice for the circuit, and a small thermal model built from the board's copper.
 
 | Top | Bottom |
 |---|---|
-| ![Top view](docs/img/board_top.png) | ![Bottom view](docs/img/board_bottom.png) |
+| ![Top render](docs/img/board_top.png) | ![Bottom render](docs/img/board_bottom.png) |
 
-## Design
+## How it works
 
-I used an N-channel MOSFET, the IRLR024N, as a source follower. A P-channel pass device on a 1.5 V input only gets about 1.5 V of gate drive, so its on-resistance is high. A separate 5 V bias rail powers the error amplifier and lets the gate rise well above the output. That keeps the dropout at 90 mV at 1 A.
-
-The error amplifier is an OPA365 set up as a PI controller. The follower's pole moves with load current, so the crossover goes from about 2 kHz at no load to 180 kHz at 1 A. I put the PI zero at 1.25 kHz, just under the light-load crossover, and added a 5 mA preload so the pole never drops too low.
-
-The divider senses the output right at the terminal block through two net ties, so the copper drop between Q1 and the load does not show up at the output. A TPS3808 holds the regulator off until VIN is above about 1.37 V, and an RC filter on the set point gives a 3.7 ms soft start.
+The awkward part of a 1 V regulator is the gate drive. With a PMOS pass device the gate can only go down to ground, so on a 1.5 V input you only get about 1.5 V of V<sub>GS</sub> and the on-resistance gets ugly. I used an NMOS source follower instead and gave the error amp its own 5 V rail, so the gate can sit up to about 4 V above the source. Q1 is an IRLR024N in DPAK, which has plenty of margin at that drive.
 
 ![Schematic](docs/img/schematic.png)
 
-## Results
+The error amp is an OPA365 running as a PI controller. A source follower is nice to compensate because it only adds one pole, but that pole moves a lot with load: about 30 Hz at no load and 1.4 kHz at 1 A. The crossover moves with it, from about 2 kHz up to 180 kHz. I put the PI zero at 1.25 kHz, just under the light-load crossover, and added a 5 mA preload so the pole can't drift any lower. Light load is where this circuit gets touchy, and the worst case I found over load, capacitor ESR and part tolerances was 56° of phase margin.
+
+The rest is mostly housekeeping:
+
+- The feedback divider reads the output right at the output terminal through two net ties, so the copper between Q1 and the terminal doesn't count. Q1's source moves 2.6 mV from 0 to 1 A, while the terminal moves 0.001 mV.
+- A TPS3808 keeps the regulator off until VIN is above about 1.37 V, then waits 20 ms.
+- Soft start is just an RC on the 0.8 V set point: 3.7 ms from 10 to 90%, with no overshoot.
+
+## Simulation results
 
 | | Target | Simulated |
 |---|---|---|
-| Output voltage at the terminals | 1.000 V ±1% | 1.000 V |
-| Dropout at 1 A | ≤ 200 mV | 90 mV |
-| Load step, 10 mA to 1 A in 1 µs | within ±30 mV | −8.7 / +7.4 mV |
-| PSRR at 1 / 10 / 100 kHz | ≥ 60 / 40 / 30 dB | 99 / 81 / 63 dB |
-| Worst phase margin over load, ESR and part tolerances | ≥ 45° | 56° |
+| Output voltage | 1.000 V ±1% | 1.000 V |
+| Dropout at 1 A | < 200 mV | 90 mV |
+| Load step, 10 mA to 1 A in 1 µs | ±30 mV | −8.7 / +7.4 mV |
+| PSRR at 1 / 10 / 100 kHz | 60 / 40 / 30 dB | 99 / 81 / 63 dB |
+| Worst-case phase margin | > 45° | 56° |
 | Soft start, 10 to 90% | 1 to 10 ms | 3.7 ms |
-| Q1 junction at 1 W, 25 °C still air | ≤ 125 °C | 58 °C |
-
-I broke the loop at the sense line and measured the loop gain at 0 A, 10 mA, 100 mA and 1 A. Then I swept the output capacitor ESR and the part tolerances. The worst case was 56° of phase margin at no load, with the polymer capacitor 20% high.
+| Q1 junction at 1 W, 25 °C | < 125 °C | 58 °C |
 
 ![Loop gain](results/loop_gain_bode.png)
 
-For the load step I went from 10 mA to 1 A at 1 A/µs. The output dropped 8.7 mV and was back within 1 mV after about 0.3 ms.
+Loop gain at 0 A, 10 mA and 1 A. I broke the loop at the sense line and used Middlebrook's double injection, since the impedances on both sides of that node are close.
 
-![Load step](results/load_transient.png)
+| | |
+|---|---|
+| ![Load step](results/load_transient.png) | ![PSRR](results/psrr.png) |
+| Load step from 10 mA to 1 A at 1 A/µs. The output dips 8.7 mV and is back within 1 mV in about 0.3 ms. | PSRR from VIN. At 1 A the lowest point between 10 Hz and 1 MHz is 50 dB at 355 kHz. |
+| ![Soft start](results/soft_start.png) | ![Phase margin against ESR](results/phase_margin_vs_esr.png) |
+| Enable at 1 ms and disable at 16 ms, with no load and with a 1 Ω load. With no load the inrush peaks at 0.35 A while the output capacitors charge. | Phase margin against output capacitor ESR. It never drops below 57°, so the loop doesn't depend on ESR. |
 
-The thermal model uses the copper of all four layers. Q1 dissipates 1 W with 2.0 V in and 1 A out. The 30 vias under and next to its tab keep the junction at 58 °C. Without them it reaches 64 °C.
+## Layout
 
-![Board temperature](results/thermal_map.png)
+| Top copper | Bottom copper |
+|---|---|
+| ![Top copper](docs/img/layout_top.png) | ![Bottom copper](docs/img/layout_bottom.png) |
 
-## Board
+Four layers, 54 × 42 mm, with both inner layers as solid ground. I was aiming for 50 × 40 mm, but the three screw terminals and the M3 holes took more room than I expected.
 
-The board is 54 × 42 mm with four layers, and both inner layers are solid ground. The power path runs in one straight line along the top edge, from J1 through the input capacitors, Q1 and the output capacitors to J2. The reference and feedback parts return to a separate quiet ground that meets the main ground only at the output terminal. ERC and DRC are clean, and `fab/` has the Gerbers, drill file, BOM and pick-and-place file.
+- The power path is one straight line along the top edge: J1, C1 and C2, Q1, C3 to C6, J2. The control parts stay below it, out of the high-current loop.
+- Q1's tab sits on a VIN pour with 30 vias down to a bigger pour on the bottom layer. In the thermal model those vias are worth about 6 °C: 58 °C with them, 64 °C without.
+- The reference and the divider return to their own ground island, which only meets the main ground at the output terminal.
+
+![Board temperature at 1 W](results/thermal_map.png)
 
 ## Files
 
@@ -52,15 +67,15 @@ The board is 54 × 42 mm with four layers, and both inner layers are solid groun
 hardware/  KiCad project
 fab/       Gerbers, drill, BOM, pick and place, STEP
 sim/       ngspice models and the Python that runs each analysis
-results/   plots, metrics.csv and the data behind each plot
+results/   plots, metrics.csv and the raw data behind each plot
 scripts/   Python that generates the schematic and board files
-docs/      design notes, schematic PDF and renders
+docs/      design notes, schematic PDF and images
 ```
 
-To rerun the simulations you need Python 3 with numpy, scipy, matplotlib and pillow, plus the ngspice shared library. The one that ships with KiCad works.
+To rerun the simulations you need Python 3 with numpy, scipy, matplotlib and pillow, plus the ngspice shared library (the one that ships with KiCad works):
 
 ```
 python sim/run_all.py
 ```
 
-The hand calculations, the other plots, the layout notes and the part models are in [docs/design-notes.md](docs/design-notes.md).
+The hand calculations, the remaining plots, the part models and the rebuild steps are in [docs/design-notes.md](docs/design-notes.md).
